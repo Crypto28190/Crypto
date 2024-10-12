@@ -2,29 +2,31 @@ from flask import Flask, request, jsonify
 from crypto import get_stock_data
 from statsmodels.tsa.arima.model import ARIMA
 from xgboost import XGBRegressor
+from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import os
+import tensorflow as tf
 
 app = Flask(__name__)
 port = int(os.environ.get("PORT", 5000))
 
-# قائمة رموز العملات المدعومة
+# قائمة بأشهر 10 عملات رقمية (بما في ذلك Baby Doge Coin)
 supported_symbols = [
     'BTC-USD',  # Bitcoin
     'ETH-USD',  # Ethereum
-    'LTC-USD',  # Litecoin
+    'BNB-USD',  # Binance Coin
+    'BABYDOGE-USD', # Baby Doge Coin
     'XRP-USD',  # Ripple
-    'BCH-USD',  # Bitcoin Cash
-    'LINK-USD', # Chainlink
-    'DOT-USD',  # Polkadot
     'ADA-USD',  # Cardano
     'SOL-USD',  # Solana
-    'DOGE-USD'  # Dogecoin
+    'DOGE-USD', # Dogecoin
+    'DOT-USD',  # Polkadot
+    'LTC-USD'   # Litecoin
 ]
 
 @app.route('/results', methods=['POST'])
 def results():
-    # قراءة المدة الزمنية من الطلب (مثل '1mo' أو '2w')
+    # قراءة المدة الزمنية من الطلب
     period = request.form.get('period', '1mo')  # إذا لم يتم تحديد المدة، افترض '1mo'
     
     results = {}
@@ -40,37 +42,70 @@ def results():
                 close_prices = close_prices.dropna()
 
             # إذا كانت البيانات غير كافية، تجاهل العملة
-            if len(close_prices) < 10:  # تعديل الحد الأدنى لعدد النقاط المطلوبة
+            if len(close_prices) < 10:
                 results[symbol] = {"error": "Insufficient data"}
                 continue
             
             # استخدام جميع البيانات للتنبؤ
             train_data = close_prices
 
-            # نموذج ARIMA
+            # -------- ARIMA Model --------
             model1 = ARIMA(train_data, order=(5, 1, 0))  
             fitted_model1 = model1.fit()
 
-            # نموذج XGBoost
+            # -------- XGBoost Model --------
             X = np.arange(len(train_data)).reshape(-1, 1)
             y = train_data.values
 
             model2 = XGBRegressor(objective='reg:squarederror', n_estimators=100)
             model2.fit(X, y)
 
-            # توقع السعر لنهاية اليوم الحالي باستخدام ARIMA و XGBoost
+            # -------- LSTM Model --------
+            # Normalization
+            scaler = MinMaxScaler(feature_range=(0, 1))
+            train_data_scaled = scaler.fit_transform(train_data.values.reshape(-1, 1))
+
+            # Reshaping data for LSTM
+            X_lstm, y_lstm = [], []
+            for i in range(10, len(train_data_scaled)):
+                X_lstm.append(train_data_scaled[i-10:i, 0])
+                y_lstm.append(train_data_scaled[i, 0])
+            
+            X_lstm, y_lstm = np.array(X_lstm), np.array(y_lstm)
+            X_lstm = np.reshape(X_lstm, (X_lstm.shape[0], X_lstm.shape[1], 1))
+
+            # LSTM model architecture
+            lstm_model = tf.keras.Sequential()
+            lstm_model.add(tf.keras.layers.LSTM(units=50, return_sequences=True, input_shape=(X_lstm.shape[1], 1)))
+            lstm_model.add(tf.keras.layers.LSTM(units=50, return_sequences=False))
+            lstm_model.add(tf.keras.layers.Dense(units=25))
+            lstm_model.add(tf.keras.layers.Dense(units=1))
+
+            # Compile and fit LSTM model
+            lstm_model.compile(optimizer='adam', loss='mean_squared_error')
+            lstm_model.fit(X_lstm, y_lstm, epochs=1, batch_size=1, verbose=2)
+
+            # Preparing the last data for prediction
+            last_10_days = train_data_scaled[-10:]
+            X_test = np.reshape(last_10_days, (1, last_10_days.shape[0], 1))
+
+            # Forecast with LSTM
+            forecast_lstm = lstm_model.predict(X_test)
+            forecast_lstm = scaler.inverse_transform(forecast_lstm)[0][0]
+
+            # -------- Predictions --------
             forecast_arima = fitted_model1.forecast(steps=1)[0]
-            next_index = np.array([[len(train_data)]])  # الخطوة التالية في X
+            next_index = np.array([[len(train_data)]])
             forecast_xgboost = model2.predict(next_index)[0]
             
-            # السعر الحالي
             current_price = close_prices.iloc[-1]
 
             # تخزين النتائج لكل عملة
             results[symbol] = {
                 "current_price": float(current_price),
                 "forecast_arima": float(forecast_arima),
-                "forecast_xgboost": float(forecast_xgboost)
+                "forecast_xgboost": float(forecast_xgboost),
+                "forecast_lstm": float(forecast_lstm)
             }
         
         except Exception as e:
