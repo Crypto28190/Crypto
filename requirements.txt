@@ -5,3 +5,4 @@ xgboost
 scikit-learn
 yfinance
 pandas
+tensorflow
