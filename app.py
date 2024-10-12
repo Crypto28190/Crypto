@@ -5,6 +5,7 @@ from xgboost import XGBRegressor
 import numpy as np
 
 app = Flask(__name__)
+port = int(os.environ.get("PORT", 5000))
 
 @app.route('/results', methods=['POST'])
 def results():
@@ -51,4 +52,4 @@ def results():
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3003, debug=True)
+    app.run(host='0.0.0.0', port=port)
