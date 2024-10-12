@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoCurrency Price Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Cryptocurrency Price Prediction</h1>
+        <form action="{{ url_for('results') }}" method="post">
+            <label for="symbol">Cryptocurrency Symbol:</label>
+            <select id="symbol" name="symbol" required>
+                <option value="">Select a stock symbol</option>
+                <option value="BTC-USD">Bitcoin USD</option>
+                <option value="ETH-USD">Ethereum USD</option>
+                <option value="USDT-USD">Tether USDt USD</option>
+                <option value="BNB-USD">BNB USD</option>
+                <option value="SOL-USD">Solana USD</option>
+                <option value="USDC-USD">USD Coin USD</option>
+                <option value="XRP-USD">XRP USD</option>
+                <option value="DOGE-USD">Dogecoin USD</option>
+                <option value="SHIB-USD">Shiba Inu USD</option>
+                <option value="AVAX-USD">Avalanche USD</option>
+                <option value="WETH-USD">WETH USD</option>
+                <option value="LINK-USD">Chainlink USD</option>
+                <option value="NEAR-USD">NEAR Protocol USD	</option>
+                <option value="MATIC-USD">Polygon USD</option>
+                <option value="PEPE24478-USD">Pepe USD</option>
+                <option value="RNDR-USD">Render USD</option>
+                <option value="WIF-USD">dogwifhat USD</option>
+                <option value="ARB11841-USD">Arbitrum USD</option>
+                <option value="FLOKI-USD">FLOKI USD</option>
+                <option value="BONK-USD">Bonk USD</option>
+                <option value="TIA22861-USD">Celestia USD</option>
+                <option value="WLD-USD">Worldcoin USD</option>
+                <option value="BOME-USD">BOOK OF MEME USD</option>
+                <option value="NOT-USD">Notcoin USD</option>
+                <option value="TURBO-USD">Turbo USD</option>
+                <option value="PEOPLE-USD">ConstitutionDAO USD</option>
+                <option value="SOL16116-USD">Wrapped Solana USD</option>
+            </select><br>
+            <label for="start_date">Start Date (YYYY-MM-DD):</label>
+            <input type="date" id="start_date" name="start_date" required><br>
+            <button type="Predict">Predict</button>
+        </form>
+    </div>
+</body>
+</html>

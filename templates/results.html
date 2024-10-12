@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Prediction Results for {{ symbol }}</h1>
+        <!--<p>Mean Squared Error (ARIMA): {{ mse1 }}</p>
+        <p>Mean Squared Error (SARIMA): {{ mse2 }}</p>-->
+        <iframe src="{{ plot_url }}" width="100%" height="500px"></iframe>
+        <a href="{{ url_for('index') }}">Back to Home</a>
+    </div>
+</body>
+</html>
