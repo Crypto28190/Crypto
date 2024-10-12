@@ -23,7 +23,7 @@ def results():
 
     # نموذج ARIMA
     model1 = ARIMA(train_data, order=(5, 1, 0))  
-    fitted_model1 = model1.fit(method='css')
+    fitted_model1 = model1.fit(method='mle')
 
     # نموذج XGBoost
     X = np.arange(len(train_data)).reshape(-1, 1)
