@@ -25,7 +25,7 @@ supported_symbols = [
 @app.route('/results', methods=['POST'])
 def results():
     # قراءة المدة الزمنية من الطلب (مثل '1mo' أو '2w')
-    period = request.form.get('period', '1mo')  # إذا لم يتم تحديد المدة، افترض '1mo'
+    period = request.form.get('period', '3mo')  # إذا لم يتم تحديد المدة، افترض '1mo'
     
     results = {}
     
@@ -40,7 +40,7 @@ def results():
 
             # نموذج ARIMA
             model1 = ARIMA(train_data, order=(5, 1, 0))  
-            fitted_model1 = model1.fit(method='mle')
+            fitted_model1 = model1.fit()
 
             # نموذج XGBoost
             X = np.arange(len(train_data)).reshape(-1, 1)
