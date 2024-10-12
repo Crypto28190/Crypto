@@ -22,8 +22,8 @@ def results():
     train_data = close_prices
 
     # نموذج ARIMA
-    model1 = ARIMA(train_data, order=(2, 1, 2))
-    fitted_model1 = model1.fit()
+    model1 = ARIMA(train_data, order=(5, 1, 0))  
+    fitted_model1 = model1.fit(method='css')
 
     # نموذج XGBoost
     X = np.arange(len(train_data)).reshape(-1, 1)
