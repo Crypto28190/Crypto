@@ -22,7 +22,7 @@ def results():
     train_data = close_prices
 
     # نموذج ARIMA
-    model1 = ARIMA(train_data, order=(5, 1, 0))
+    model1 = ARIMA(train_data, order=(2, 1, 2))
     fitted_model1 = model1.fit()
 
     # نموذج XGBoost
