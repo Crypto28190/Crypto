@@ -51,4 +51,4 @@ def results():
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=3003)
+    app.run(host='0.0.0.0', port=3003, debug=True)
