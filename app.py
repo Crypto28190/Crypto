@@ -40,7 +40,7 @@ def results():
                 close_prices = close_prices.dropna()
 
             # إذا كانت البيانات غير كافية، تجاهل العملة
-            if len(close_prices) < 2:
+            if len(close_prices) < 10:  # تعديل الحد الأدنى لعدد النقاط المطلوبة
                 results[symbol] = {"error": "Insufficient data"}
                 continue
             
@@ -49,7 +49,7 @@ def results():
 
             # نموذج ARIMA
             model1 = ARIMA(train_data, order=(5, 1, 0))  
-            fitted_model1 = model1.fit()  # إزالة method='mle'
+            fitted_model1 = model1.fit()
 
             # نموذج XGBoost
             X = np.arange(len(train_data)).reshape(-1, 1)
