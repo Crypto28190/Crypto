@@ -1,6 +1,32 @@
+# app.py
+from flask import Flask, request, jsonify
+from crypto import get_stock_data
+from statsmodels.tsa.arima.model import ARIMA
+from xgboost import XGBRegressor
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+import os
+import tensorflow as tf
+
+app = Flask(__name__)
+port = int(os.environ.get("PORT", 5000))
+
+# قائمة بأشهر 10 عملات رقمية (بما في ذلك Baby Doge Coin)
+supported_symbols = [
+    'BTC-USD',  # Bitcoin
+    'ETH-USD',  # Ethereum
+    'BNB-USD',  # Binance Coin
+    'BABYDOGE-USD', # Baby Doge Coin
+    'XRP-USD',  # Ripple
+    'ADA-USD',  # Cardano
+    'SOL-USD',  # Solana
+    'DOGE-USD', # Dogecoin
+    'DOT-USD',  # Polkadot
+    'LTC-USD'   # Litecoin
+]
+
 @app.route('/results', methods=['POST'])
 def results():
-
     # قراءة المدخلات من الطلب
     period = request.form.get('period', '1mo')  # إذا لم يتم تحديد المدة، افترض '1mo'
     model_type = request.form.get('model', 'arima')  # افتراض استخدام arima إذا لم يتم تحديد النموذج
@@ -19,6 +45,12 @@ def results():
         try:
             # جلب البيانات بناءً على الفترة المحددة
             stock_data = get_stock_data(symbol, period)
+            
+            # إذا كان هناك خطأ في جلب البيانات
+            if 'error' in stock_data:
+                results[symbol] = {"error": stock_data['error']}
+                continue
+
             close_prices = stock_data['Close']
             
             # التحقق من وجود قيم مفقودة
@@ -102,3 +134,6 @@ def results():
 
     # إرجاع جميع النتائج كـ JSON
     return jsonify(results)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=port)
