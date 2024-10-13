@@ -14,15 +14,7 @@ port = int(os.environ.get("PORT", 5000))
 # قائمة بأشهر 10 عملات رقمية (بما في ذلك Baby Doge Coin)
 supported_symbols = [
     'BTC-USD',  # Bitcoin
-    'ETH-USD',  # Ethereum
-    'BNB-USD',  # Binance Coin
-    'BABYDOGE-USD', # Baby Doge Coin
-    'XRP-USD',  # Ripple
-    'ADA-USD',  # Cardano
-    'SOL-USD',  # Solana
-    'DOGE-USD', # Dogecoin
-    'DOT-USD',  # Polkadot
-    'LTC-USD'   # Litecoin
+    'ETH-USD'  # Ethereum
 ]
 
 @app.route('/results', methods=['POST'])
