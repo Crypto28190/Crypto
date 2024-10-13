@@ -27,34 +27,30 @@ supported_symbols = [
 
 @app.route('/results', methods=['POST'])
 def results():
-    # ... (بقية الكود كما هو)
+    results = {}  # تأكد من تعريف results كقاموس فارغ
+    data = request.json
+    model_type = data.get('model_type', 'arima')  # تعيين نوع النموذج الافتراضي
+    period = data.get('period', '1d')  # أو أي قيمة افتراضية أخرى
     
     # عملية التنبؤ بناءً على المدخلات
     for symbol in supported_symbols:
         try:
-            # جلب البيانات بناءً على الفترة المحددة
             stock_data = get_stock_data(symbol, period)
             
-            # إذا كان هناك خطأ في جلب البيانات
             if 'error' in stock_data:
                 results[symbol] = {"error": stock_data['error']}
                 continue
 
             close_prices = stock_data['Close']
-
-            # التحقق من وجود قيم مفقودة
             if close_prices.isnull().any():
                 close_prices = close_prices.dropna()
 
-            # إذا كانت البيانات غير كافية، تجاهل العملة
             if len(close_prices) < 10:
                 results[symbol] = {"error": "Insufficient data"}
                 continue
             
-            # التنبؤ باستخدام النموذج المختار
             train_data = close_prices
             
-            # -------- ARIMA Model --------
             if model_type == 'arima':
                 model1 = ARIMA(train_data, order=(5, 1, 0))  
                 fitted_model1 = model1.fit()
@@ -64,11 +60,9 @@ def results():
                     "forecast_arima": float(forecast_arima)
                 }
 
-            # -------- XGBoost Model --------
             elif model_type == 'xgboost':
                 X = np.arange(len(train_data)).reshape(-1, 1)
                 y = train_data.values
-
                 model2 = XGBRegressor(objective='reg:squarederror', n_estimators=100)
                 model2.fit(X, y)
                 next_index = np.array([[len(train_data)]])
@@ -78,7 +72,6 @@ def results():
                     "forecast_xgboost": float(forecast_xgboost)
                 }
 
-            # -------- LSTM Model --------
             elif model_type == 'lstm':
                 # Normalization
                 scaler = MinMaxScaler(feature_range=(0, 1))
@@ -118,11 +111,10 @@ def results():
                 }
         
         except Exception as e:
-            # إذا حدث خطأ، سجل رسالة الخطأ للعملة المحددة
             results[symbol] = {"error": str(e)}
 
-    # إرجاع جميع النتائج كـ JSON
     return jsonify(results)
+
 
 
 if __name__ == '__main__':
