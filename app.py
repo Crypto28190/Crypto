@@ -1,37 +1,20 @@
-from flask import Flask, request, jsonify
-from crypto import get_stock_data
-from statsmodels.tsa.arima.model import ARIMA
-from xgboost import XGBRegressor
-from sklearn.preprocessing import MinMaxScaler
-import numpy as np
-import os
-import tensorflow as tf
-
-app = Flask(__name__)
-port = int(os.environ.get("PORT", 5000))
-
-# قائمة بأشهر 10 عملات رقمية (بما في ذلك Baby Doge Coin)
-supported_symbols = [
-    'BTC-USD',  # Bitcoin
-    'ETH-USD',  # Ethereum
-    'BNB-USD',  # Binance Coin
-    'BABYDOGE-USD', # Baby Doge Coin
-    'XRP-USD',  # Ripple
-    'ADA-USD',  # Cardano
-    'SOL-USD',  # Solana
-    'DOGE-USD', # Dogecoin
-    'DOT-USD',  # Polkadot
-    'LTC-USD'   # Litecoin
-]
-
 @app.route('/results', methods=['POST'])
 def results():
+
     # قراءة المدخلات من الطلب
     period = request.form.get('period', '1mo')  # إذا لم يتم تحديد المدة، افترض '1mo'
     model_type = request.form.get('model', 'arima')  # افتراض استخدام arima إذا لم يتم تحديد النموذج
     
+    # التحقق من صحة المدخلات
+    if model_type not in ['arima', 'xgboost', 'lstm']:
+        return jsonify({"error": "Invalid model type. Choose from 'arima', 'xgboost', 'lstm'"}), 400
+
+    if period not in ['1mo', '3mo', '6mo', '1y', '2y']:
+        return jsonify({"error": "Invalid period. Choose from '1mo', '3mo', '6mo', '1y', '2y'"}), 400
+
     results = {}
     
+    # عملية التنبؤ بناءً على المدخلات
     for symbol in supported_symbols:
         try:
             # جلب البيانات بناءً على الفترة المحددة
@@ -47,7 +30,7 @@ def results():
                 results[symbol] = {"error": "Insufficient data"}
                 continue
             
-            # استخدام جميع البيانات للتنبؤ
+            # التنبؤ باستخدام النموذج المختار
             train_data = close_prices
 
             # -------- ARIMA Model --------
@@ -119,6 +102,3 @@ def results():
 
     # إرجاع جميع النتائج كـ JSON
     return jsonify(results)
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=port)
