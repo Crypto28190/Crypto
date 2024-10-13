@@ -27,18 +27,7 @@ supported_symbols = [
 
 @app.route('/results', methods=['POST'])
 def results():
-    # قراءة المدخلات من الطلب
-    period = request.form.get('period', '1mo')  # إذا لم يتم تحديد المدة، افترض '1mo'
-    model_type = request.form.get('model', 'arima')  # افتراض استخدام arima إذا لم يتم تحديد النموذج
-    
-    # التحقق من صحة المدخلات
-    if model_type not in ['arima', 'xgboost', 'lstm']:
-        return jsonify({"error": "Invalid model type. Choose from 'arima', 'xgboost', 'lstm'"}), 400
-
-    if period not in ['1mo', '3mo', '6mo', '1y', '2y']:
-        return jsonify({"error": "Invalid period. Choose from '1mo', '3mo', '6mo', '1y', '2y'"}), 400
-
-    results = {}
+    # ... (بقية الكود كما هو)
     
     # عملية التنبؤ بناءً على المدخلات
     for symbol in supported_symbols:
@@ -52,7 +41,7 @@ def results():
                 continue
 
             close_prices = stock_data['Close']
-            
+
             # التحقق من وجود قيم مفقودة
             if close_prices.isnull().any():
                 close_prices = close_prices.dropna()
@@ -64,7 +53,7 @@ def results():
             
             # التنبؤ باستخدام النموذج المختار
             train_data = close_prices
-
+            
             # -------- ARIMA Model --------
             if model_type == 'arima':
                 model1 = ARIMA(train_data, order=(5, 1, 0))  
@@ -134,6 +123,7 @@ def results():
 
     # إرجاع جميع النتائج كـ JSON
     return jsonify(results)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=port)
