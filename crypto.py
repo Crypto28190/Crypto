@@ -1,9 +1,9 @@
+# crypto.py
 import yfinance as yf
-import pandas as pd
 
 def get_stock_data(symbol, period):
     try:
-        # استخدم yfinance لجلب البيانات بناءً على رمز العملة والمدة الزمنية
+        # استخدم yfinance لجلب البيانات بناءً على رمز العملة والفترة الزمنية
         stock_data = yf.download(symbol, period=period)
 
         # تحقق مما إذا كانت هناك عمود 'Close' في البيانات
