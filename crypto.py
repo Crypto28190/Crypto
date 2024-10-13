@@ -16,3 +16,4 @@ def get_stock_data(symbol, period):
         return stock_data
     except Exception as e:
         return {"error": str(e)}
+        
