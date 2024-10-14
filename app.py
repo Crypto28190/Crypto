@@ -15,15 +15,13 @@ def results():
     results = {}
     data = request.json
 
-    # استلام العملة، عدد الأيام، نوع النموذج من الطلب
+    # استلام العملة، الفترة الزمنية، نوع النموذج من الطلب
     symbol = data.get('symbol')  # العملة المطلوبة
     model_type = data.get('model_type', 'arima')  # نوع النموذج الافتراضي
-    days = data.get('days', 1)  # عدد الأيام الافتراضي 1
+    period = data.get('period', '1d')  # الفترة الزمنية الافتراضية هي يوم واحد
 
     if not symbol:
         return jsonify({"error": "Symbol is required"}), 400
-
-    period = f'{days}d'  # تحويل عدد الأيام إلى صيغة مناسبة
 
     try:
         # جلب البيانات التاريخية بناءً على المدخلات
